@@ -14,6 +14,7 @@
         <script src="util.js"></script>
         <script src="ds.js"></script>
         <script src="nmea.js"></script>
+        <script src="connector.js"></script>
         <script src="serial.js"></script>
         <script src="udp.js"></script>
         <script src="main.js"></script>
@@ -113,7 +114,11 @@
         </div>
         <div class="groupBox terminal" id="terminal">
         </div>
-        <button class="button terminalButton" id="startStopTerminal">Start terminal</button>
+        <div class="buttonArea">
+            <button class="button generalButton" id="startStopTerminal">Start terminal</button>
+            <button class="button generalButton" id="connectDisconnect">Connect</button>
+        </div>
+
         <!--<div id="mapDiv" class="groupBox map">
         </div>-->
         <div class="groupBox dataSheet">

@@ -3,20 +3,30 @@ function getCurTime ()
     return new Date ().getTime ();
 }
 
-function selectChannel (obj)
+function selectChannel (liElem, channelObj)
 {
     var channels       = document.getElementById ('channels');
     var serialSettings = document.getElementById ('serialSettings');
     var udpSettings    = document.getElementById ('udpSettings');
 
+    curChannelLI = liElem;
+    curConnector = channelObj;
+
+    if (terminal && !termPaused)
+        terminal.innerText = '';
+
+    channelIndex = -1;
+
     for (var i = 0; i < channels.children.length; ++ i)
     {
-        var selected = channels.children [i] === obj;
+        var selected = channels.children [i] === liElem;
 
         channels.children [i].className = selected ? 'selectedChannel' : null;
 
         if (selected)
         {
+            channelIndex = i;
+
             if (i < 2)
             {
                 serialSettings.style.display = null;

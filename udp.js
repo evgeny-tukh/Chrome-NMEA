@@ -1,31 +1,26 @@
 function UdpSocket ()
 {
-    this.port      = 0;
+    this.port      = null;
     this.bindAddr  = null;
     this.handle    = null;
-    this.onReceive = null;
+    this.objects   = UdpSocket.globals.ports;
+    this.typeInfo  = { type: 'udp', value: 2 };
 
-    UdpSocket.globals.ports.push (this);
+    Connector.apply (this, arguments);
 }
 
-UdpSocket.prototype.delete = function ()
+UdpSocket.prototype = Object.create (Connector.prototype);
+
+UdpSocket.prototype.used = function ()
 {
-    var index = UdpSocket.globals.sockets.indexOf (this);
-
-    if (index >= 0)
-    {
-        if (UdpSocket.globals.sockets [index].handle)
-            UdpSocket.globals.sockets.close ();
-
-        UdpSocket.globals.sockets.splice (index, 1);
-    }
-}
+    return this.port;
+};
 
 UdpSocket.prototype.open = function (onOpen)
 {
     var instance = this;
 
-    chrome.sockets.up.create ({}, openCb);
+    chrome.sockets.udp.create ({}, openCb);
 
     function openCb (info)
     {
@@ -69,17 +64,12 @@ UdpSocket.prototype.close = function (onClosed)
     }
 };
 
-UdpSocket.prototype.isOpen = function ()
-{
-    return this.handle !== null;
-};
-
 UdpSocket.globals = { ports: [] };
 
 chrome.sockets.udp.onReceive.addListener (function (info)
                                           {
-                                              var handleOwner = UdpSocket.globals.ports.find (function (port) { return port.handle === info.connectionId; });
+                                              var handleOwner = UdpSocket.globals.ports.find (function (port) { return port.handle === info.socketId; });
 
                                               if (handleOwner && handleOwner.onReceive)
-                                                  handleOwner.onReceive (info.data, info.remoteAddress, info.remotePort);
+                                                  handleOwner.onReceive (info.data, Connector.types.udp, info.socketId, info.remoteAddress, info.remotePort);
                                           });

@@ -98,11 +98,16 @@ body
     font-size:		12pt;
 }
 
-.terminalButton
+.buttonArea
 {
     position:		absolute;
     top:		515px;
     left:		375px;
+    right:		10px;
+}
+
+.generalButton
+{
 }
 
 .controlBox

@@ -1,16 +1,19 @@
-var serialPorts  = [new SerialPort (), new SerialPort ()];
-var udpSockets   = [new UdpSocket (), new UdpSocket ()];
+var allChannels  = [new SerialPort (), new SerialPort (), new UdpSocket (), new UdpSocket (), new Connector (), new Connector ()];
+var channelIndex = -1;
+var curConnector = null;
+var curChannelLI = null;
 var selectedPort = null;
 var selectedUdp  = null;
 var terminal     = null;
-var pause        = null;
-var paused       = true;
+var pauseTerm    = null;
+var connect      = null;
+var termPaused   = true;
+var connected    = false;
 var updater      = null;
 var map          = null;
 var googleApi;
 
-serialPorts.forEach (function (port) { port.onReceive = onReceive; });
-udpSockets.forEach (function (socket) { socket.onReceive = onReceive; });
+allChannels.forEach (function (channel) { channel.onReceive = onReceive });
 
 window.onload = function ()
                 {
@@ -27,9 +30,11 @@ window.onload = function ()
                     document.getElementById ('openCloseUdpSocket').onclick  = onOpenCloseUdpSocket;
 
                     terminal = document.getElementById ('terminal');
-                    pause    = document.getElementById ('startStopTerminal');
+                    pauseTerm    = document.getElementById ('startStopTerminal');
+                    connect  = document.getElementById ('connectDisconnect');
 
-                    pause.onclick = onPauseResumeTerminal;
+                    pauseTerm.onclick   = onPauseResumeTerminal;
+                    connect.onclick = onConnectDisconnect;
 
                     document.getElementById ('port').onchange     = onSelectPortIndex;
                     document.getElementById ('baud').onchange     = onSelectBaud;
@@ -43,7 +48,10 @@ window.onload = function ()
                     channels = document.getElementById ('channels').children;
                     
                     for (var i = 0; i < channels.length; ++ i)
-                        channels [i].onclick = function () { selectChannel (this); };
+                    {
+                        channels [i].channelObj = allChannels [i];
+                        channels [i].onclick    = function () { selectChannel (this, this.channelObj); };
+                    }
 
                     updater = setInterval (onUpdate, 1000);
 
@@ -52,11 +60,17 @@ window.onload = function ()
                         var portList = document.getElementById ('port');
                         var i;
 
-                        for (i = 0; i < ports.length; ++ i)
+                        while (portList.children.length > 0)
+                            portList.removeChild (portList.children [0]);
+
+                        for (i = 0, addPort (SerialPort.notUsed); i < ports.length; ++ i)
+                            addPort (ports [i]);
+
+                        function addPort (portName)
                         {
                             var option = document.createElement ('option');
 
-                            option.innerText = ports [i];
+                            option.innerText = portName;
 
                             portList.appendChild (option);
                         }
@@ -107,57 +121,57 @@ function onOpenCloseUdpSocket ()
 
 function onChangeUdpPort ()
 {
-    if (selectedUdp)
-        selectedUdp.port = parseInt (this.value);
+    if (channelIndex >= 0)
+        allChannels [channelIndex].port = parseInt (this.value);
 }
 
 function onChangeUdpBindAddr ()
 {
-    if (selectedUdp)
-        selectedUdp.bindAddr = this.value;
+    if (channelIndex >= 0)
+        allChannels [channelIndex].bindAddr = this.value;
 }
 
 function onSelectPortIndex ()
 {
-    if (selectedPort)
-        selectedPort.portName = this.options [this.selectedIndex].innerText;
+    if (channelIndex >= 0)
+        allChannels [channelIndex].portName = this.options [this.selectedIndex].innerText;
 }
 
 function onSelectBaud ()
 {
-    if (selectedPort)
-        selectedPort.baud = parseInt (this.options [this.selectedIndex].innerText);
+    if (channelIndex >= 0)
+        allChannels [channelIndex].baud = parseInt (this.options [this.selectedIndex].innerText);
 }
 
 function onSelectByteSize ()
 {
-    if (selectedPort)
+    if (channelIndex >= 0)
     {
         switch (parseInt (this.options [this.selectedIndex].innerText))
         {
             case 6:
-                selectedPort.byteSize = 'six'; break;
+                allChannels [channelIndex].byteSize = 'six'; break;
 
             case 7:
-                selectedPort.byteSize = 'seven'; break;
+                allChannels [channelIndex].byteSize = 'seven'; break;
 
             case 8:
             default:
-                selectedPort.byteSize = 'eight'; break;
+                allChannels [channelIndex].byteSize = 'eight'; break;
         }
     }
 }
 
 function onSelectParity ()
 {
-    if (selectedPort)
-        selectedPort.parity = SerialPort.parities [this.selectedIndex];
+    if (channelIndex >= 0)
+        allChannels [channelIndex].parity = SerialPort.parities [this.selectedIndex];
 }
 
 function onSelectStopBits ()
 {
-    if (selectedPort)
-        selectedPort.stopBits = SerialPort.stopBits [this.selectedIndex];
+    if (channelIndex >= 0)
+        allChannels [channelIndex].stopBits = SerialPort.stopBits [this.selectedIndex];
 }
 
 function selectSerialPort (index)
@@ -169,18 +183,18 @@ function selectSerialPort (index)
     var stopBits  = document.getElementById ('stopBits');
     var parities  = document.getElementById ('parity');
 
-    selectedPort = (index === null) ? null : serialPorts [index];
+    selectedPort = (index === null || index >= 2 || index < 0) ? null : allChannels [index];
 
-    if (selectedPort !== null)
+    if (channelIndex >= 0)
     {
-        if (selectedPort.isOpen ())
+        if (allChannels [channelIndex].isOpen ())
             button.innerText = 'Open';
         else
             button.innerText = 'Close';
 
         for (var i = 0; i < ports.options.length; ++ i)
         {
-            if (ports.options [i].innerText === selectedPort.portName)
+            if (ports.options [i].innerText === allChannels [channelIndex].portName)
             {
                 ports.selectedIndex = i; break;
             }
@@ -188,7 +202,7 @@ function selectSerialPort (index)
 
         for (var i = 0; i < bauds.options.length; ++ i)
         {
-            if (parseInt (bauds.options [i].innerText) === selectedPort.baud)
+            if (parseInt (bauds.options [i].innerText) === allChannels [channelIndex].baud)
             {
                 bauds.selectedIndex = i; break;
             }
@@ -196,14 +210,14 @@ function selectSerialPort (index)
 
         for (var i = 0; i < byteSizes.options.length; ++ i)
         {
-            if (parseInt (byteSizes.options [i].innerText) === SerialPort.byteSizes [selectedPort.byteSize])
+            if (parseInt (byteSizes.options [i].innerText) === SerialPort.byteSizes [allChannels [channelIndex].byteSize])
             {
                 byteSizes.selectedIndex = i; break;
             }
         }
 
-        parities.selectedIndex = SerialPort.parities.indexOf (selectedPort.parity);
-        stopBits.selectedIndex = SerialPort.stopBits.indexOf (selectedPort.stopBits);
+        parities.selectedIndex = SerialPort.parities.indexOf (allChannels [channelIndex].parity);
+        stopBits.selectedIndex = SerialPort.stopBits.indexOf (allChannels [channelIndex].stopBits);
     }
 }
 
@@ -213,25 +227,43 @@ function selectUdpSocket (index)
     var port      = document.getElementById ('udpPort');
     var bind      = document.getElementById ('udpBind');
 
-    selectedUdp = (index === null) ? null : udpSockets [index];
+    selectedUdp = (index === null || index < 0 || index >= 2) ? null : allChannels [index];
 
-    if (selectedUdp !== null)
+    if (channelIndex >= 0)
     {
-        if (selectedUdp.isOpen ())
+        if (allChannels [channelIndex].isOpen ())
             button.innerText = 'Open';
         else
             button.innerText = 'Close';
 
-        port.value = selectedUdp.port;
-        port.bind  = selectedUdp.bindAddr;
+        port.value = allChannels [channelIndex].port ? allChannels [channelIndex].port : null;
+        port.bind  = allChannels [channelIndex].bindAddr;
     }
+}
+
+function onConnectDisconnect ()
+{
+    connected = !connected;
+
+    connect.innerText = connected ? 'Disconnect' : 'Connect';
+
+    allChannels.forEach (function (channel)
+                         {
+                             if (channel.used ())
+                             {
+                                 if (connected)
+                                     channel.open ();
+                                 else
+                                     channel.close ();
+                             }
+                         });
 }
 
 function onPauseResumeTerminal ()
 {
-    paused = !paused;
+    termPaused = !termPaused;
 
-    pause.innerText = paused ? 'Start terminal' : 'Stop terminal';
+    pauseTerm.innerText = termPaused ? 'Start terminal' : 'Stop terminal';
 }
 
 function initGoogleMaps ()
@@ -250,7 +282,7 @@ function initGoogleMaps ()
                        };*/
 }
 
-function onReceive (arrayBuffer)
+function onReceive (arrayBuffer, connectorType, handle)
 {
     var byteBuffer = new Uint8Array (arrayBuffer);
     var data;
@@ -260,7 +292,7 @@ function onReceive (arrayBuffer)
 
     parsers.parse (data);
 
-    if (!paused)
+    if (!termPaused && curConnector && curConnector.typeInfo.value === connectorType && curConnector.handle === handle)
     {
         terminal.innerText += data;
         terminal.scrollTop  = 100000;
