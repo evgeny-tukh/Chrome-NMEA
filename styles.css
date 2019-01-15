@@ -1,0 +1,201 @@
+body
+{
+    -moz-user-select:	none;
+    -khtml-user-select:	none;
+    user-select:	none;    
+    outline:		transparent;
+}
+
+.caption
+{
+    background-color:	blue;
+    color:		white;
+    font-size:		16pt;
+    width:		100%;
+    height:		fit-content;
+    padding:		5px;
+    margin:		0px;
+}
+
+.groupBox
+{
+    color:		black;
+    border-color:	black;
+    border-width:	2px;
+    border-style:	solid;
+    border-radius:	3px;
+    text-align:		center;
+    margin:		5px;
+    padding:		10px;
+}
+
+.channels
+{
+    position:		absolute;
+    top:		50px;
+    left:		0px;
+    width:		130px;
+    height:		460px;
+    font-size:		15pt;
+}
+
+.portSettings
+{
+    position:		absolute;
+    top:		50px;
+    left:		160px;
+    width:		180px;
+    height:		fit-content;
+    font-size:		15pt;
+}
+
+.dataSheet
+{
+    position:		absolute;
+    top:		280px;
+    left:		160px;
+    width:		180px;
+    height:		230px;
+    font-size:		15pt;
+}
+
+.cell
+{
+    padding-top:        0px;
+    padding-bottom:     0px;
+    padding-left:       0px;
+    padding-right:      0px;
+    margin-top:         0px;
+    margin-bottom:      0px;
+    margin-left:        0px;
+    margin-right:       0px;
+    font-size:          11pt;
+    /*border-style:       solid;
+    border-width:       1px;
+    border-color:       gray;*/
+}
+
+.map
+{
+    position:		absolute;
+    top:		285px;
+    left:		210px;
+    right:		10px;
+    height:		230px;
+}
+
+.terminal
+{
+    position:		absolute;
+    top:		50px;
+    left:		370px;
+    right:		10px;
+    height:		430px;
+    overflow-x:		hide;
+    overflow-y:		scroll;
+    text-align:         left;
+    margin-right:       0px;
+    font-size:		12pt;
+}
+
+.terminalButton
+{
+    position:		absolute;
+    top:		515px;
+    left:		375px;
+}
+
+.controlBox
+{
+    color:		black;
+    line-height:	15px;
+    border-style:	none;
+    font-size:		14pt;
+    text-align:		left;
+    padding:		5px;
+    margin:		5px;
+}
+
+.controlBox:first
+{
+    margin-top:		10px;
+}
+
+.control
+{
+    float:		right;
+    width:		80px;
+    heght:		fit-content;
+    padding:		0px;
+    margin:		0px;
+}
+
+.button
+{
+    background-color:	blue;
+    color:		white;
+    font-size:		11pt;
+    width:		fit-content;
+    margin:		0px;
+    margin-right:	6px;
+    height:		25px;
+    padding:		3px;
+    padding-left:	7px;
+    padding-right:	7px;
+    text-align:		center;
+    border-style:	none;
+    border-radius:	3px;
+    border-width:	0px;
+    float:		right;
+}
+
+.channelList
+{
+    /*
+    position:           absolute;
+    top:                0px;
+    left:               0px;*/
+    display:            block;
+    width:              100%;
+    list-style-type:    none;
+    text-align:         left;
+    padding:            0px;
+    font-size:          14pt;
+}
+
+li, li:hover, .selectedChannel
+{
+    padding:            5px;
+}
+
+li
+{
+    color:              black;
+    background-color:   transparent;
+}
+
+li:hover
+{
+    color:              blue;
+    background-color:   transparent;
+}
+
+.selectedChannel, .selectedChannel:hover
+{
+    color:              white;
+    background-color:   blue;
+}
+
+.ip
+{
+    font-size:          10pt;
+    font-stretch:       ultra-condensed;
+    font-weight:        100;
+    width:              85px;
+    text-align:         center;
+}
+
+.port
+{
+    width:              50px;
+}

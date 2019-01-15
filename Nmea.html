@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <!--<meta http-equiv="Content-Security-Policy" content="script-src-elem 'self' 'unsafe-inline';">
+        <!--<meta http-equiv="Content-Security-Policy" content="script-src-elem 'nonce-abc' 'self' 'unsafe-inline'; script-src-attr 'unsafe-inline'"> -->
+
+        <title>NMEA 0183 Reader & Parser</title>
+
+        <!-- <link rel="stylesheet" href="bootstrap.min.css">
+        <link rel="stylesheet" href="demo.css"> -->
+
+        <!--<script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyCsZWmFuiHNNNIh5GSgkz6bhJuWhbtk21g"></script>-->
+        <script src="util.js"></script>
+        <script src="ds.js"></script>
+        <script src="nmea.js"></script>
+        <script src="serial.js"></script>
+        <script src="udp.js"></script>
+        <script src="main.js"></script>
+
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <div class="caption">
+            NMEA0183 Serial Reader & Parser
+        </div>
+        <div class="groupBox channels">
+            Channels
+            <ul id="channels" class="channelList">
+                <li>Serial sensor 1</li>
+                <li>Serial sensor 2</li>
+                <li>UDP sensor 1</li>
+                <li>UDP sensor 2</li>
+                <li>TCP sensor 1</li>
+                <li>TCP sensor 2</li>
+            </ul>
+        </div>
+        <div id="udpSettings" class="groupBox portSettings" style="display:none;">
+            UDP port settings
+
+            <div class="controlBox">
+                Port
+
+                <input id="udpPort" type="number" min="1000" max="100000" step="1" class="control port">
+            </div>
+
+            <div class="controlBox">
+                Bind to
+
+                <input id="udpBind" type="text" class="control ip" pattern="[0-9]{3}.[0-9]{3}" placeholder="nnn.nnn.nnn.nnn">
+            </div>
+
+            <button class="button" id="openCloseUdpSocket">Open</button>
+        </div>
+        <div id="serialSettings" class="groupBox portSettings" style="display:none;">
+            Serial port settings
+
+            <div class="controlBox">
+                Port
+
+                <select id="port" size="1" class="control">
+                    <!--<option>COM1</option>
+                    <option>COM2</option>
+                    <option>COM3</option>
+                    <option>COM4</option>-->
+                </select>
+            </div>
+
+            <div class="controlBox">
+                Baud
+
+                <select id="baud" size="1" class="control">
+                    <option>4800</option>
+                    <option>9600</option>
+                    <option>38400</option>
+                    <option>115200</option>
+                </select>
+            </div>
+
+            <div class="controlBox" class="control">
+                Byte size
+
+                <select id="byteSize" size="1" class="control">
+                    <option>8</option>
+                    <option>7</option>
+                    <option>6</option>
+                </select>
+            </div>
+
+            <div class="controlBox">
+                Parity
+
+                <select id="parity" size="1" class="control">
+                    <option>None</option>
+                    <option>Even</option>
+                    <option>Odd</option>
+                    <option>Mark</option>
+                    <option>Space</option>
+                </select>
+            </div>
+
+            <div class="controlBox">
+                Stop bits
+
+                <select id="stopBits" size="1" class="control">
+                    <option>1</option>
+                    <option>1.5</option>
+                    <option>2</option>
+                </select>
+            </div>
+
+            <button class="button" id="openCloseSerialPort">Open</button>
+        </div>
+        <div class="groupBox terminal" id="terminal">
+        </div>
+        <button class="button terminalButton" id="startStopTerminal">Start terminal</button>
+        <!--<div id="mapDiv" class="groupBox map">
+        </div>-->
+        <div class="groupBox dataSheet">
+            Data
+
+            <div class="controlBox cell">
+                UTC
+
+                <div id="utc" class="control cell">
+                    N/A
+                </div>
+            </div>
+            <div class="controlBox cell">
+                Lat
+
+                <div id="lat" class="control cell">
+                    N/A
+                </div>
+            </div>
+            <div class="controlBox cell">
+                Lon
+
+                <div id="lon" class="control cell">
+                    N/A
+                </div>
+            </div>
+            <div class="controlBox cell">
+                COG
+
+                <div id="cog" class="control cell">
+                    N/A
+                </div>
+            </div>
+            <div class="controlBox cell">
+                HDG
+
+                <div id="hdg" class="control cell">
+                    N/A
+                </div>
+            </div>
+            <div class="controlBox cell">
+                SOG
+
+                <div id="sog" class="control cell">
+                    N/A
+                </div>
+            </div>
+            <div class="controlBox cell">
+                STW
+
+                <div id="stw" class="control cell">
+                    N/A
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

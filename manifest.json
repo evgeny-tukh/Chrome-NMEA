@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+
+  "name": "Chrome NMEA",
+  "description": "Reads and parses NMEA0183 from the serial port or LAN",
+
+  "version": "1.0.0",
+
+  "app": { "background": { "scripts": ["background.js"] } },
+
+  "icons": { "16": "res/icn-16x16.png", "128": "res/icn-128x128.png" },
+
+  "externally_connectable": { "ids": ["*"], "matches": ["*://localhost/*", "*://ya.ru/*"] },
+
+  "sockets": { "udp": { "bind": "*" } },
+
+  "permissions": ["serial", "background"]
+}
