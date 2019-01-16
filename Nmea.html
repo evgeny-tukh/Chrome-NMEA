@@ -46,12 +46,14 @@
             </div>
 
             <div class="controlBox">
-                Bind to
+                Bind
 
                 <input id="udpBind" type="text" class="control ip" pattern="[0-9]{3}.[0-9]{3}" placeholder="nnn.nnn.nnn.nnn">
-            </div>
 
-            <button class="button" id="openCloseUdpSocket">Open</button>
+                <select id="udpNicList" size="1" class="control ipList">
+                    <!--<option>0.0.0.0</option>-->
+                </select>
+            </div>
         </div>
         <div id="serialSettings" class="groupBox portSettings" style="display:none;">
             Serial port settings
@@ -109,8 +111,6 @@
                     <option>2</option>
                 </select>
             </div>
-
-            <button class="button" id="openCloseSerialPort">Open</button>
         </div>
         <div class="groupBox terminal" id="terminal">
         </div>

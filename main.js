@@ -25,16 +25,19 @@ window.onload = function ()
                     initGoogleMaps ();
 
                     SerialPort.enumPorts (onPortListLoaded);
+                    UdpSocket.enumNic (onNicListLoaded);
 
-                    document.getElementById ('openCloseSerialPort').onclick = onOpenCloseSerialPort;
-                    document.getElementById ('openCloseUdpSocket').onclick  = onOpenCloseUdpSocket;
+                    //document.getElementById ('openCloseSerialPort').onclick = onOpenCloseSerialPort;
+                    //document.getElementById ('openCloseUdpSocket').onclick  = onOpenCloseUdpSocket;
 
-                    terminal = document.getElementById ('terminal');
-                    pauseTerm    = document.getElementById ('startStopTerminal');
-                    connect  = document.getElementById ('connectDisconnect');
+                    terminal  = document.getElementById ('terminal');
+                    pauseTerm = document.getElementById ('startStopTerminal');
+                    connect   = document.getElementById ('connectDisconnect');
 
-                    pauseTerm.onclick   = onPauseResumeTerminal;
-                    connect.onclick = onConnectDisconnect;
+                    document.getElementById ('udpNicList').onchange = function () { document.getElementById ('udpBind').value = this.value; };
+
+                    pauseTerm.onclick = onPauseResumeTerminal;
+                    connect.onclick   = onConnectDisconnect;
 
                     document.getElementById ('port').onchange     = onSelectPortIndex;
                     document.getElementById ('baud').onchange     = onSelectBaud;
@@ -55,6 +58,24 @@ window.onload = function ()
 
                     updater = setInterval (onUpdate, 1000);
 
+                    function onNicListLoaded (nics)
+                    {
+                        var nicList = document.getElementById ('udpNicList');
+                        var i;
+
+                        while (nicList.children.length > 0)
+                            nicList.removeChild (nicList.children [0]);
+
+                        for (i = 0, addItem (nicList, UdpSocket.AllNics), addItem (nicList, UdpSocket.LocalHost); i < nics.length; ++ i)
+                        {
+                            var addr = nics [i].address;
+
+                            // Only IPv4 addresses
+                            if (addr.indexOf (':') < 0)
+                                addItem (nicList, addr);
+                        }
+                    }
+
                     function onPortListLoaded (ports)
                     {
                         var portList = document.getElementById ('port');
@@ -63,17 +84,17 @@ window.onload = function ()
                         while (portList.children.length > 0)
                             portList.removeChild (portList.children [0]);
 
-                        for (i = 0, addPort (SerialPort.notUsed); i < ports.length; ++ i)
-                            addPort (ports [i]);
+                        for (i = 0, addItem (portList, SerialPort.notUsed); i < ports.length; ++ i)
+                            addItem (portList, ports [i]);
+                    }
 
-                        function addPort (portName)
-                        {
-                            var option = document.createElement ('option');
+                    function addItem (selectElem, portName)
+                    {
+                        var option = document.createElement ('option');
 
-                            option.innerText = portName;
+                        option.innerText = portName;
 
-                            portList.appendChild (option);
-                        }
+                        selectElem.appendChild (option);
                     }
 
                     function onUpdate ()
@@ -89,7 +110,7 @@ window.onload = function ()
                     }
                 };
 
-function onOpenClose (buttonId, object)
+/*function onOpenClose (buttonId, object)
 {
     var button = document.getElementById (buttonId);
 
@@ -118,7 +139,7 @@ function onOpenCloseUdpSocket ()
 {
     onOpenClose ('openCloseUdpSocket', selectedUdp);
 }
-
+*/
 function onChangeUdpPort ()
 {
     if (channelIndex >= 0)
@@ -176,7 +197,7 @@ function onSelectStopBits ()
 
 function selectSerialPort (index)
 {
-    var button    = document.getElementById ('openCloseSerialPort');
+    //var button    = document.getElementById ('openCloseSerialPort');
     var ports     = document.getElementById ('port');
     var bauds     = document.getElementById ('baud');
     var byteSizes = document.getElementById ('byteSize');
@@ -187,10 +208,10 @@ function selectSerialPort (index)
 
     if (channelIndex >= 0)
     {
-        if (allChannels [channelIndex].isOpen ())
+        /*if (allChannels [channelIndex].isOpen ())
             button.innerText = 'Open';
         else
-            button.innerText = 'Close';
+            button.innerText = 'Close';*/
 
         for (var i = 0; i < ports.options.length; ++ i)
         {
@@ -223,7 +244,7 @@ function selectSerialPort (index)
 
 function selectUdpSocket (index)
 {
-    var button    = document.getElementById ('openCloseUdpSocket');
+    //var button    = document.getElementById ('openCloseUdpSocket');
     var port      = document.getElementById ('udpPort');
     var bind      = document.getElementById ('udpBind');
 
@@ -231,10 +252,10 @@ function selectUdpSocket (index)
 
     if (channelIndex >= 0)
     {
-        if (allChannels [channelIndex].isOpen ())
+        /*if (allChannels [channelIndex].isOpen ())
             button.innerText = 'Open';
         else
-            button.innerText = 'Close';
+            button.innerText = 'Close';*/
 
         port.value = allChannels [channelIndex].port ? allChannels [channelIndex].port : null;
         port.bind  = allChannels [channelIndex].bindAddr;

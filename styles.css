@@ -44,9 +44,11 @@ body
     position:		absolute;
     top:		50px;
     left:		160px;
-    width:		180px;
+    width:		200px;
     height:		fit-content;
     font-size:		15pt;
+    padding-left:       0px;
+    padding-right:      0px;
 }
 
 .dataSheet
@@ -191,13 +193,19 @@ li:hover
     background-color:   blue;
 }
 
-.ip
+.ip, .ipList
 {
-    font-size:          10pt;
+    font-size:          13pt;
     font-stretch:       ultra-condensed;
     font-weight:        100;
-    width:              85px;
+    width:              125px;
     text-align:         center;
+    margin-right:       0px;
+}
+
+.ipList
+{
+    margin-top:         10px;
 }
 
 .port

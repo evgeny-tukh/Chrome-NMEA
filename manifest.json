@@ -14,5 +14,5 @@
 
   "sockets": { "udp": { "bind": "*" } },
 
-  "permissions": ["serial", "background"]
+  "permissions": ["serial", "background", "system.network"]
 }

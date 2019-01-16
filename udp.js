@@ -64,7 +64,14 @@ UdpSocket.prototype.close = function (onClosed)
     }
 };
 
-UdpSocket.globals = { ports: [] };
+UdpSocket.globals   = { ports: [] };
+UdpSocket.AllNics   = '0.0.0.0';
+UdpSocket.LocalHost = '127.0.0.1';
+
+UdpSocket.enumNic = function (onNicListLoaded)
+{
+    chrome.system.network.getNetworkInterfaces (onNicListLoaded);
+};
 
 chrome.sockets.udp.onReceive.addListener (function (info)
                                           {
