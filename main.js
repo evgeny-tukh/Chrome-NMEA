@@ -11,7 +11,10 @@ var termPaused   = true;
 var connected    = false;
 var updater      = null;
 var map          = null;
+var osType       = null;
 var googleApi;
+
+chrome.runtime.getPlatformInfo (function (info) { osType = info.os; });
 
 allChannels.forEach (function (channel) { channel.onReceive = onReceive });
 
@@ -83,6 +86,15 @@ window.onload = function ()
 
                         while (portList.children.length > 0)
                             portList.removeChild (portList.children [0]);
+
+                        if (ports.length === 0 && osType !== 'win')
+                        {
+                            for (var i = 0; i <= 10; ++ i)
+                                ports.push ('/dev/ttyS' + i.toString ());
+
+                            ports.push ('/dev/ttyUSB0');
+                            ports.push ('/dev/ttyUSB1');
+                        }
 
                         for (i = 0, addItem (portList, SerialPort.notUsed); i < ports.length; ++ i)
                             addItem (portList, ports [i]);

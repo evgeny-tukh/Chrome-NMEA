@@ -182,7 +182,9 @@ THS.prototype.parse = function (sentence)
 
 function NmeaParsers ()
 {
-    this.parsers = {};
+    this.parsers  = {};
+    this.rawData  = '';
+    this.splitter = new RegExp ('([!\$][^!^\$^\*]+[*][0-9A-F]{2})', 'gm');
 
     NmeaParsers.prototype.add.apply (this, [new GLL ()]);
     NmeaParsers.prototype.add.apply (this, [new VTG ()]);
@@ -191,19 +193,116 @@ function NmeaParsers ()
     NmeaParsers.prototype.add.apply (this, [new VHW ()]);
 }
 
+NmeaParsers.prototype.extractSentence = function ()
+{
+    var start  = this.findSentenceBegin (0),
+        next   = start >= 0 ? this.findSentenceBegin (start + 1) : -1,
+        result = null;
+
+    if (start >= 0)
+    {
+        if (next < 0)
+        {
+            var end = this.findSentenceEnd (start);
+
+            if (end >= 0)
+                next = end + 1;
+        }
+
+        if (next >= 0)
+        {
+            if (next < this.rawData.length)
+            {
+                result = this.rawData.substr (start, end);
+
+                this.rawData = this.rawData.substring (next);
+            }
+            else
+            {
+                result = this.rawData.substr (start);
+
+                this.rawData = '';
+            }
+        }
+    }
+
+    return result;
+};
+
+NmeaParsers.prototype.findSentenceEnd = function (from)
+{
+    var asteriskPos = this.rawData.indexOf ('*', from);
+
+    return ((asteriskPos >= 0) && ((this.rawData.length - asteriskPos) > 2)) ? asteriskPos + 2 : -1;
+};
+
+NmeaParsers.prototype.findSentenceBegin = function (from)
+{
+    var dollarPos = this.rawData.indexOf ('$', from),
+        exclamPos = this.rawData.indexOf ('!', from),
+        start;
+
+    if (dollarPos >= 0 && exclamPos >= 0)
+        start = Math.min (dollarPos, exclamPos);
+    else if (dollarPos >= 0)
+        start = dollarPos;
+    else if (exclamPos >= 0)
+        start = exclamPos;
+    else
+        start = -1;
+
+    return start;
+};
+
 NmeaParsers.prototype.add = function (parser)
 {
     this.parsers [parser.type] = parser;
 };
 
+NmeaParsers.splitToSentences = function (buffer)
+{
+    var result = { ignored: '', sentences: [], unprocessed: '' };
+    var regexp = /([!\$].+\*[0-9A-F]{2})|(^[!\$].*)/g;
+    var items  = buffer.match (regexp);
+    var start  = 0;
+
+    if (items [0][0] !== '$' && items [0][0] !== '!')
+    {
+        start ++;
+
+        result.ignored
+    }
+
+}
+
 NmeaParsers.prototype.parse = function (data)
 {
     var sentence = new NmeaSentence ();
+    var extraction;
+    var parseResult;
+    var unprocessedChar;
 
-    sentence.parse (data);
+    this.rawData += data;
+
+    while ((parseResult = this.splitter.exec (this.rawData)) !== null)
+    {
+        sentence.parse (parseResult [0]);
+
+        if (sentence.type in this.parsers)
+            this.parsers [sentence.type].parse (sentence);
+
+        unprocessedChar = this.splitter.lastIndex;
+    }
+
+    this.rawData = unprocessedChar !== null ? this.rawData.substring (unprocessedChar) : '';
+
+    /*extraction = this.extractSentence ();
+
+    if (extraction)
+        sentence.parse (extraction);
 
     if (sentence.type in this.parsers)
-        this.parsers [sentence.type].parse (sentence);
+        this.parsers [sentence.type].parse (sentence);*/
 };
 
 function NmeaSentence ()
